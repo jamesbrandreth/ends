@@ -1,1 +1,2 @@
-initdb data/db -U ends
+mkdir data;
+initdb data/db -U ends;

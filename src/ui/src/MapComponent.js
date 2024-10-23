@@ -9,13 +9,11 @@ import VectorTileSource from "ol/source/VectorTile";
 import MVT from "ol/format/MVT";
 import Overlay from "ol/Overlay";
 import { toLonLat } from "ol/proj";
-import { toStringHDMS } from "ol/coordinate";
 
 function MapComponent() {
   const [placeName, setPlaceName] = useState("");
   const [currentCoordinate, setCurrentCoordinate] = useState(null);
   const popupRef = useRef(null);
-  const popupContentRef = useRef(null);
   const popupCloserRef = useRef(null);
   const mapRef = useRef(null);
   const overlayRef = useRef(null);
@@ -23,9 +21,7 @@ function MapComponent() {
 
   const refreshVectorTiles = () => {
     if (vectorTileSourceRef.current) {
-      // Clear the tile cache
       vectorTileSourceRef.current.clear();
-      // Refresh all tiles
       vectorTileSourceRef.current.refresh();
     }
   };
@@ -42,43 +38,29 @@ function MapComponent() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: placeName,
-          lat: lat,
-          lon: lon,
-        }),
+        body: JSON.stringify({ name: placeName, lat, lon }),
       });
 
       if (response.ok) {
-        // Clear the form and close popup
         setPlaceName("");
         overlayRef.current.setPosition(undefined);
-
-        // Refresh the vector tiles to show the new point
         refreshVectorTiles();
-      } else {
-        console.error("Failed to add point");
       }
     } catch (error) {
       console.error("Error submitting point:", error);
     }
   };
 
-  // Initialize map and overlay once
   useEffect(() => {
-    // Create the overlay first
     overlayRef.current = new Overlay({
       element: popupRef.current,
       autoPan: {
-        animation: {
-          duration: 250,
-        },
+        animation: { duration: 250 },
       },
     });
 
-    // Set up popup closer
     if (popupCloserRef.current) {
-      popupCloserRef.current.onclick = function () {
+      popupCloserRef.current.onclick = () => {
         overlayRef.current.setPosition(undefined);
         popupCloserRef.current.blur();
         setPlaceName("");
@@ -87,7 +69,6 @@ function MapComponent() {
       };
     }
 
-    // Create point style
     const pointStyle = new Style({
       image: new Circle({
         radius: 12,
@@ -96,14 +77,12 @@ function MapComponent() {
       }),
     });
 
-    // Create tile source and store reference
     vectorTileSourceRef.current = new VectorTileSource({
       format: new MVT(),
       url: "/tiles/{z}/{x}/{y}",
       maxzoom: 14,
     });
 
-    // Create map instance
     mapRef.current = new Map({
       target: "map",
       layers: [
@@ -123,58 +102,48 @@ function MapComponent() {
       overlays: [overlayRef.current],
     });
 
-    // Add click handler
-    mapRef.current.on("singleclick", function (evt) {
-      const coordinate = evt.coordinate;
-      setCurrentCoordinate(coordinate);
-      overlayRef.current.setPosition(coordinate);
+    mapRef.current.on("singleclick", (evt) => {
+      setCurrentCoordinate(evt.coordinate);
+      overlayRef.current.setPosition(evt.coordinate);
     });
 
-    // Cleanup function
     return () => {
       if (mapRef.current) {
         mapRef.current.setTarget(null);
       }
     };
-  }, []); // Empty dependency array - only run once
+  }, []);
 
   return (
     <>
       <div
-        style={{ height: "100vh", width: "100%" }}
         id="map"
         className="map-container"
+        style={{ height: "100vh", width: "100%" }}
       />
       <div ref={popupRef} className="ol-popup">
-        <a href="#" ref={popupCloserRef} className="ol-popup-closer"></a>
-        <div ref={popupContentRef}>
-          <form onSubmit={handleSubmit} className="p-4">
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">
-                Name this place:
-              </label>
-              <input
-                type="text"
-                value={placeName}
-                onChange={(e) => setPlaceName(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
-                placeholder="Enter place name"
-                required
-              />
-            </div>
-            {currentCoordinate && (
-              <div className="text-sm mb-4">
-                <p>Coordinates: {toStringHDMS(toLonLat(currentCoordinate))}</p>
-              </div>
-            )}
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
-            >
-              Save Location
-            </button>
-          </form>
-        </div>
+        <a href="#" ref={popupCloserRef} className="ol-popup-closer" />
+        <form onSubmit={handleSubmit} className="p-4">
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">
+              Name this place:
+            </label>
+            <input
+              type="text"
+              value={placeName}
+              onChange={(e) => setPlaceName(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md"
+              placeholder="Enter place name"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
+          >
+            Save Location
+          </button>
+        </form>
       </div>
     </>
   );

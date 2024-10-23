@@ -31,7 +31,9 @@ async fn main() {
         .route("/tiles/:z/:x/:y", get(tile))
         .with_state(pool.clone())
         .route("/add_point", post(add_point))
-        .with_state(pool);
+        .with_state(pool.clone())
+        .route("/get_placenames", get(get_placenames))
+        .with_state(pool.clone());
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:4000")
         .await
@@ -93,4 +95,13 @@ async fn add_point(
         .await
         .map(|_| Json(()))
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+}
+
+async fn get_placenames(State(pool): State<PgPool>) -> Result<Json<Vec<String>>, StatusCode> {
+    let rows: Vec<String> = sqlx::query_scalar::<_, String>(r#"SELECT name FROM placenames"#)
+        .fetch_all(&pool)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    Ok(Json(rows))
 }

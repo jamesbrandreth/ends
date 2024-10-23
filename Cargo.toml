@@ -8,5 +8,11 @@ axum = "0.7.7"
 bytes = "1.8.0"
 include_dir = "0.7.4"
 serde = "1.0.213"
+sqlx = { version = "0.8.2", features = [
+    "runtime-tokio",
+    "tls-native-tls",
+    "postgres",
+    "macros",
+] }
 tokio = { version = "1.41.0", features = ["macros", "rt-multi-thread"] }
 tower-serve-static = "0.1.1"

@@ -1,3 +1,5 @@
 procs:
   db:
     shell: "postgres -D data/db"
+  server:
+    shell: "export DATABASE_URL=postgres://ends@localhost/ends; cargo run"

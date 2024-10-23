@@ -6,5 +6,7 @@ edition = "2021"
 [dependencies]
 axum = "0.7.7"
 bytes = "1.8.0"
+include_dir = "0.7.4"
 serde = "1.0.213"
-tokio = "1.41.0"
+tokio = { version = "1.41.0", features = ["macros", "rt-multi-thread"] }
+tower-serve-static = "0.1.1"

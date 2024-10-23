@@ -1,0 +1,3 @@
+procs:
+  db:
+    shell: "postgres -D data/db"

@@ -1,0 +1,1 @@
+initdb data/db

@@ -7,19 +7,21 @@ import "ol/ol.css";
 
 function MapComponent() {
   useEffect(() => {
+    const osmLayer = new TileLayer({
+      preload: Infinity,
+      source: new OSM(),
+    });
+
     const map = new Map({
       target: "map",
-      layers: [
-        new TileLayer({
-          source: new OSM(),
-        }),
-      ],
+      layers: [osmLayer],
       view: new View({
         center: [0, 0],
         zoom: 0,
       }),
     });
-  });
+    return () => map.setTarget(null);
+  }, []);
 
   return (
     <div

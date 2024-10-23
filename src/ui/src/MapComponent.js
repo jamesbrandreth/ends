@@ -26,6 +26,12 @@ function MapComponent() {
     }
   };
 
+  const closePopup = () => {
+    overlayRef.current.setPosition(undefined);
+    setPlaceName("");
+    setCurrentCoordinate(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!currentCoordinate || !placeName) return;
@@ -42,8 +48,7 @@ function MapComponent() {
       });
 
       if (response.ok) {
-        setPlaceName("");
-        overlayRef.current.setPosition(undefined);
+        closePopup();
         refreshVectorTiles();
       }
     } catch (error) {
@@ -61,10 +66,8 @@ function MapComponent() {
 
     if (popupCloserRef.current) {
       popupCloserRef.current.onclick = () => {
-        overlayRef.current.setPosition(undefined);
+        closePopup();
         popupCloserRef.current.blur();
-        setPlaceName("");
-        setCurrentCoordinate(null);
         return false;
       };
     }
@@ -116,33 +119,21 @@ function MapComponent() {
 
   return (
     <>
-      <div
-        id="map"
-        className="map-container"
-        style={{ height: "100vh", width: "100%" }}
-      />
+      <div id="map" style={{ width: "100%", height: "100vh" }} />
       <div ref={popupRef} className="ol-popup">
         <a href="#" ref={popupCloserRef} className="ol-popup-closer" />
-        <form onSubmit={handleSubmit} className="p-4">
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">
-              Name this place:
-            </label>
+        <form onSubmit={handleSubmit}>
+          <div>
             <input
+              id="placeName"
               type="text"
               value={placeName}
               onChange={(e) => setPlaceName(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md"
               placeholder="Enter place name"
               required
             />
           </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
-          >
-            Save Location
-          </button>
+          <button type="submit">Save Name</button>
         </form>
       </div>
     </>

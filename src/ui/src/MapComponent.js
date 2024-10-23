@@ -19,6 +19,16 @@ function MapComponent() {
   const popupCloserRef = useRef(null);
   const mapRef = useRef(null);
   const overlayRef = useRef(null);
+  const vectorTileSourceRef = useRef(null);
+
+  const refreshVectorTiles = () => {
+    if (vectorTileSourceRef.current) {
+      // Clear the tile cache
+      vectorTileSourceRef.current.clear();
+      // Refresh all tiles
+      vectorTileSourceRef.current.refresh();
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,9 +50,12 @@ function MapComponent() {
       });
 
       if (response.ok) {
-        // Clear the form and close popup on success
+        // Clear the form and close popup
         setPlaceName("");
         overlayRef.current.setPosition(undefined);
+
+        // Refresh the vector tiles to show the new point
+        refreshVectorTiles();
       } else {
         console.error("Failed to add point");
       }
@@ -83,8 +96,8 @@ function MapComponent() {
       }),
     });
 
-    // Create tile source
-    const tileSource = new VectorTileSource({
+    // Create tile source and store reference
+    vectorTileSourceRef.current = new VectorTileSource({
       format: new MVT(),
       url: "/tiles/{z}/{x}/{y}",
       maxzoom: 14,
@@ -99,7 +112,7 @@ function MapComponent() {
           source: new OSM(),
         }),
         new VectorTileLayer({
-          source: tileSource,
+          source: vectorTileSourceRef.current,
           style: pointStyle,
         }),
       ],

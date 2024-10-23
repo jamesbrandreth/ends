@@ -1,1 +1,1 @@
-initdb data/db
+initdb data/db -U ends

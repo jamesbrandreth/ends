@@ -33,7 +33,7 @@ async fn main() {
         .route("/add_point", post(add_point))
         .with_state(pool);
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:4000")
         .await
         .unwrap();
     println!("listening on {}", listener.local_addr().unwrap());

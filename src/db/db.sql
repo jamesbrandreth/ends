@@ -2,6 +2,7 @@ CREATE EXTENSION postgis;
 
 CREATE TABLE placenames (
    name TEXT PRIMARY KEY,
+   colour INTEGER,
    unique(name)
 );
 
@@ -40,16 +41,16 @@ BEGIN
 
 -- Generate the MVT
 WITH mvt_data AS (
-   SELECT name,
+   SELECT points.name, to_hex(placenames.colour) as colour,
           ST_AsMVTGeom(
-              ST_Transform(p.location, 3857),  -- Transform to Web Mercator
+              ST_Transform(points.location, 3857),  -- Transform to Web Mercator
               ST_Transform(bbox, 3857),        -- Transform bbox to Web Mercator
               4096,   -- Tile extent
               64,     -- Buffer
               true    -- Clip geometry
           ) AS geom
-   FROM points p
-   WHERE ST_Intersects(p.location, ST_Transform(bbox, 4326))
+   FROM points LEFT JOIN placenames ON points.name=placenames.name
+   WHERE ST_Intersects(points.location, ST_Transform(bbox, 4326))
 )
 SELECT ST_AsMVT(mvt_data.*, 'points', 4096, 'geom')
 INTO tile
@@ -63,8 +64,8 @@ $$;
 CREATE PROCEDURE insert_point(lon float, lat float, placename text)
 LANGUAGE sql
 BEGIN ATOMIC
-   INSERT INTO placenames (name)
-   VALUES (placename)
+   INSERT INTO placenames (name, colour)
+   VALUES (placename, (floor(random() * 16777216)::int))
    ON CONFLICT (name) DO NOTHING;
 
    INSERT INTO points

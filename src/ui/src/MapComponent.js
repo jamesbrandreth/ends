@@ -35,7 +35,6 @@ function MapComponent() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!currentCoordinate || !placeName) return;
-
     const [lon, lat] = toLonLat(currentCoordinate);
 
     try {
@@ -72,13 +71,17 @@ function MapComponent() {
       };
     }
 
-    const pointStyle = new Style({
-      image: new Circle({
-        radius: 12,
-        fill: new Fill({ color: "red" }),
-        stroke: new Stroke({ color: "black", width: 2 }),
-      }),
-    });
+    const pointStyleFunction = (feature) => {
+      console.log(feature);
+      const colour = feature.get("colour");
+      return new Style({
+        image: new Circle({
+          radius: 12,
+          fill: new Fill({ color: `#${colour}` }),
+          stroke: new Stroke({ color: "black", width: 2 }),
+        }),
+      });
+    };
 
     vectorTileSourceRef.current = new VectorTileSource({
       format: new MVT(),
@@ -95,7 +98,7 @@ function MapComponent() {
         }),
         new VectorTileLayer({
           source: vectorTileSourceRef.current,
-          style: pointStyle,
+          style: pointStyleFunction,
         }),
       ],
       view: new View({

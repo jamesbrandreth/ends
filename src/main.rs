@@ -98,7 +98,7 @@ async fn add_point(
 }
 
 async fn get_placenames(State(pool): State<PgPool>) -> Result<Json<Vec<String>>, StatusCode> {
-    let rows: Vec<String> = sqlx::query_scalar::<_, String>(r#"SELECT name FROM placenames"#)
+    let rows: Vec<String> = sqlx::query_scalar::<_, String>(r#"SELECT name FROM places"#)
         .fetch_all(&pool)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;

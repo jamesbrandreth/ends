@@ -1,6 +1,6 @@
 CREATE EXTENSION postgis;
 
-CREATE TABLE placenames (
+CREATE TABLE places (
    name TEXT PRIMARY KEY,
    colour INTEGER,
    unique(name)
@@ -8,7 +8,7 @@ CREATE TABLE placenames (
 
 CREATE TABLE points (
    location GEOMETRY(Point, 4326),
-   name TEXT REFERENCES placenames(name)
+   name TEXT REFERENCES places(name)
 );
 
 -- Grid generation query
@@ -41,7 +41,7 @@ BEGIN
 
 -- Generate the MVT
 WITH mvt_data AS (
-   SELECT points.name, to_hex(placenames.colour) as colour,
+   SELECT points.name, to_hex(places.colour) as colour,
           ST_AsMVTGeom(
               ST_Transform(points.location, 3857),  -- Transform to Web Mercator
               ST_Transform(bbox, 3857),        -- Transform bbox to Web Mercator
@@ -49,7 +49,7 @@ WITH mvt_data AS (
               64,     -- Buffer
               true    -- Clip geometry
           ) AS geom
-   FROM points LEFT JOIN placenames ON points.name=placenames.name
+   FROM points LEFT JOIN places ON points.name=places.name
    WHERE ST_Intersects(points.location, ST_Transform(bbox, 4326))
 )
 SELECT ST_AsMVT(mvt_data.*, 'points', 4096, 'geom')
@@ -64,7 +64,7 @@ $$;
 CREATE PROCEDURE insert_point(lon float, lat float, placename text)
 LANGUAGE sql
 BEGIN ATOMIC
-   INSERT INTO placenames (name, colour)
+   INSERT INTO places (name, colour)
    VALUES (placename, (floor(random() * 16777216)::int))
    ON CONFLICT (name) DO NOTHING;
 

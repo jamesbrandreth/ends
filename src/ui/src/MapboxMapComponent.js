@@ -147,7 +147,7 @@ function MapComponent() {
                 x2="12"
                 y2="22"
                 stroke="black"
-                stroke-width="1"
+                stroke-width="2"
               />
               <line
                 x1="2"
@@ -155,7 +155,7 @@ function MapComponent() {
                 x2="22"
                 y2="12"
                 stroke="black"
-                stroke-width="1"
+                stroke-width="2"
               />
             </svg>
           </div>

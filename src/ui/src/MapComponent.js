@@ -13,8 +13,7 @@ import { toLonLat } from "ol/proj";
 function MapComponent() {
   const [placeName, setPlaceName] = useState("");
   const [currentCoordinate, setCurrentCoordinate] = useState(null);
-  const popupRef = useRef(null);
-  const popupCloserRef = useRef(null);
+  const [editMode, setEditMode] = useState(false);
   const mapRef = useRef(null);
   const overlayRef = useRef(null);
   const vectorTileSourceRef = useRef(null);
@@ -26,50 +25,12 @@ function MapComponent() {
     }
   };
 
-  const closePopup = () => {
-    overlayRef.current.setPosition(undefined);
-    setPlaceName("");
-    setCurrentCoordinate(null);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!currentCoordinate || !placeName) return;
-    const [lon, lat] = toLonLat(currentCoordinate);
-
-    try {
-      const response = await fetch("/add_point", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name: placeName, lat, lon }),
-      });
-
-      if (response.ok) {
-        closePopup();
-        refreshVectorTiles();
-      }
-    } catch (error) {
-      console.error("Error submitting point:", error);
-    }
-  };
-
   useEffect(() => {
     overlayRef.current = new Overlay({
-      element: popupRef.current,
       autoPan: {
         animation: { duration: 250 },
       },
     });
-
-    if (popupCloserRef.current) {
-      popupCloserRef.current.onclick = () => {
-        closePopup();
-        popupCloserRef.current.blur();
-        return false;
-      };
-    }
 
     const pointStyleFunction = (feature) => {
       console.log(feature);
@@ -85,7 +46,7 @@ function MapComponent() {
 
     vectorTileSourceRef.current = new VectorTileSource({
       format: new MVT(),
-      url: "/tiles/{z}/{x}/{y}",
+      url: "tiles/{z}/{x}/{y}",
       maxzoom: 14,
     });
 
@@ -108,11 +69,6 @@ function MapComponent() {
       overlays: [overlayRef.current],
     });
 
-    mapRef.current.on("singleclick", (evt) => {
-      setCurrentCoordinate(evt.coordinate);
-      overlayRef.current.setPosition(evt.coordinate);
-    });
-
     return () => {
       if (mapRef.current) {
         mapRef.current.setTarget(null);
@@ -120,24 +76,80 @@ function MapComponent() {
     };
   }, []);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!placeName) return;
+    const [lon, lat] = toLonLat(mapRef.current.getView().getCenter());
+
+    try {
+      const response = await fetch("add_point", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: placeName, lat, lon }),
+      });
+
+      if (response.ok) {
+        refreshVectorTiles();
+      }
+    } catch (error) {
+      console.error("Error submitting point:", error);
+    }
+  };
+  var panelHeight = 3;
+
   return (
     <>
-      <div id="map" style={{ width: "100%", height: "100vh" }} />
-      <div ref={popupRef} className="ol-popup">
-        <a href="#" ref={popupCloserRef} className="ol-popup-closer" />
-        <form onSubmit={handleSubmit}>
-          <div>
-            <input
-              id="placeName"
-              type="text"
-              value={placeName}
-              onChange={(e) => setPlaceName(e.target.value)}
-              placeholder="Enter place name"
-              required
-            />
-          </div>
-          <button type="submit">Save Name</button>
-        </form>
+      <div
+        id="map"
+        style={{ width: "100%", height: `calc(100vh - ${panelHeight}em)` }}
+      />
+      <div
+        id="panel"
+        style={{
+          width: "100%",
+          height: `${panelHeight}em`,
+          display: "inline-block",
+        }}
+      >
+        {" "}
+        {editMode ? (
+          <>
+            <button
+              Style={{ display: "inline-block" }}
+              onClick={() => {
+                setEditMode(!editMode);
+              }}
+            >
+              View
+            </button>
+            <div Style={{ display: "inline-block" }}>
+              <form onSubmit={handleSubmit}>
+                <input
+                  Style={{ display: "inline-block" }}
+                  id="placeName"
+                  type="text"
+                  value={placeName}
+                  onChange={(e) => setPlaceName(e.target.value)}
+                  placeholder="Enter place name"
+                  required
+                />
+                <button Style={{ display: "inline-block" }} type="submit">
+                  Save Name
+                </button>
+              </form>
+            </div>
+          </>
+        ) : (
+          <button
+            onClick={() => {
+              setEditMode(!editMode);
+            }}
+          >
+            Edit
+          </button>
+        )}
       </div>
     </>
   );

@@ -3,3 +3,5 @@ procs:
     shell: "postgres -D data/db"
   server:
     shell: "export DATABASE_URL=postgres://ends@localhost/ends; cargo run"
+  ui:
+    shell: "npm run --prefix src/ui start"

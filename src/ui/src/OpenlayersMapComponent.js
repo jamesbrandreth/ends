@@ -12,7 +12,6 @@ import { toLonLat } from "ol/proj";
 
 function MapComponent() {
   const [placeName, setPlaceName] = useState("");
-  const [currentCoordinate, setCurrentCoordinate] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const mapRef = useRef(null);
   const overlayRef = useRef(null);

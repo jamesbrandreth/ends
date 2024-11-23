@@ -1,6 +1,7 @@
 import logo from "./logo.svg";
 import "./App.css";
-import MapComponent from "./MapComponent";
+// import MapComponent from "./OpenlayersMapComponent";
+import MapComponent from "./MapboxMapComponent";
 
 function App() {
   return <MapComponent />;

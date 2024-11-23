@@ -30,7 +30,11 @@ function MapComponent() {
           },
           points: {
             type: "vector",
-            tiles: [`http://localhost:4000/tiles/{z}/{x}/{y}`],
+            tiles: [`http://localhost:4000/tiles/points/{z}/{x}/{y}`],
+          },
+          polygons: {
+            type: "vector",
+            tiles: [`http://localhost:4000/tiles/polygons/{z}/{x}/{y}`],
           },
         },
         layers: [
@@ -54,6 +58,17 @@ function MapComponent() {
               ],
               "circle-opacity": 1,
             },
+          },
+          {
+            id: "polygons",
+            type: "line",
+            source: "polygons",
+            "source-layer": "polygon",
+            paint: {
+              "line-color": "#000",
+              "line-width": 1,
+            },
+            filter: ["==", "$type", "Polygon"],
           },
         ],
       },
@@ -140,20 +155,20 @@ function MapComponent() {
       >
         {editMode && (
           <div style={{ zIndex: "1", pointerEvents: "none" }}>
-            <svg viewBox="0 0 24 24" width="24" height="24">
+            <svg viewBox="0 0 48 48" width="48" height="48">
               <line
-                x1="12"
-                y1="2"
-                x2="12"
-                y2="22"
+                x1="24"
+                y1="4"
+                x2="24"
+                y2="44"
                 stroke="black"
                 stroke-width="2"
               />
               <line
-                x1="2"
-                y1="12"
-                x2="22"
-                y2="12"
+                x1="4"
+                y1="24"
+                x2="44"
+                y2="24"
                 stroke="black"
                 stroke-width="2"
               />

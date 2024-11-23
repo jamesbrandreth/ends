@@ -100,30 +100,34 @@ function MapComponent() {
   return (
     <>
       <div className="topbar">
-        <div
+        {/* EDIT MODE TOGGLE */}
+        <button
           className="topbar-item"
           onClick={() => {
             setEditMode(!editMode);
           }}
         >
           {editMode ? "View" : "Edit"}
-        </div>
-        <div className="topbar-item">
-          <form onSubmit={handleSubmit}>
-            <input
-              Style={{ display: "inline-block" }}
-              id="placeName"
-              type="text"
-              value={placeName}
-              onChange={(e) => setPlaceName(e.target.value)}
-              placeholder="Enter place name"
-              required
-            />
-            <button Style={{ display: "inline-block" }} type="submit">
-              Save Name
-            </button>
-          </form>
-        </div>
+        </button>
+        {/* NAME ENTRY */}
+        {editMode && (
+          <div className="topbar-item">
+            <form onSubmit={handleSubmit}>
+              <input
+                Style={{ display: "inline-block" }}
+                id="placeName"
+                type="text"
+                value={placeName}
+                onChange={(e) => setPlaceName(e.target.value)}
+                placeholder="Enter place name"
+                required
+              />
+              <button Style={{ display: "inline-block" }} type="submit">
+                Save Name
+              </button>
+            </form>
+          </div>
+        )}
       </div>
       <div
         id="map-container"
@@ -134,7 +138,6 @@ function MapComponent() {
           alignItems: "center",
         }}
       >
-        (
         {editMode && (
           <div style={{ zIndex: "1", pointerEvents: "none" }}>
             <svg viewBox="0 0 24 24" width="24" height="24">
@@ -157,7 +160,6 @@ function MapComponent() {
             </svg>
           </div>
         )}
-        )
       </div>
     </>
   );

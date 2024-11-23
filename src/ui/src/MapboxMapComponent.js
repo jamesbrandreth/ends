@@ -12,6 +12,8 @@ function MapComponent() {
 
   const [placeName, setPlaceName] = useState(null);
 
+  const [editMode, setEditMode] = useState(false);
+
   const [centre, setCentre] = useState(INITIAL_CENTRE);
   const [zoom, setZoom] = useState(INITIAL_ZOOM);
 
@@ -28,7 +30,7 @@ function MapComponent() {
           },
           points: {
             type: "vector",
-            tiles: [`${window.location.origin}/tiles/{z}/{x}/{y}`],
+            tiles: [`http://localhost:4000/tiles/{z}/{x}/{y}`],
           },
         },
         layers: [
@@ -66,6 +68,12 @@ function MapComponent() {
       setZoom(mapZoom);
     });
 
+    mapRef.current.addControl(
+      new mapboxgl.AttributionControl({
+        customAttribution: "© OpenStreetMap contributors",
+      }),
+    );
+
     return () => {
       mapRef.current.remove();
     };
@@ -77,7 +85,7 @@ function MapComponent() {
     const [lon, lat] = [centre[0], centre[1]];
 
     try {
-      const response = await fetch(`${window.location.origin}/add_point`, {
+      const response = await fetch(`http://localhost:4000/add_point`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,21 +99,31 @@ function MapComponent() {
 
   return (
     <>
-      <div className="sidebar">
-        <form onSubmit={handleSubmit}>
-          <input
-            Style={{ display: "inline-block" }}
-            id="placeName"
-            type="text"
-            value={placeName}
-            onChange={(e) => setPlaceName(e.target.value)}
-            placeholder="Enter place name"
-            required
-          />
-          <button Style={{ display: "inline-block" }} type="submit">
-            Save Name
-          </button>
-        </form>{" "}
+      <div className="topbar">
+        <div
+          className="topbar-item"
+          onClick={() => {
+            setEditMode(!editMode);
+          }}
+        >
+          {editMode ? "View" : "Edit"}
+        </div>
+        <div className="topbar-item">
+          <form onSubmit={handleSubmit}>
+            <input
+              Style={{ display: "inline-block" }}
+              id="placeName"
+              type="text"
+              value={placeName}
+              onChange={(e) => setPlaceName(e.target.value)}
+              placeholder="Enter place name"
+              required
+            />
+            <button Style={{ display: "inline-block" }} type="submit">
+              Save Name
+            </button>
+          </form>
+        </div>
       </div>
       <div
         id="map-container"
@@ -116,26 +134,30 @@ function MapComponent() {
           alignItems: "center",
         }}
       >
-        <div style={{ zIndex: "1", pointerEvents: "none" }}>
-          <svg viewBox="0 0 24 24" width="24" height="24">
-            <line
-              x1="12"
-              y1="2"
-              x2="12"
-              y2="22"
-              stroke="black"
-              stroke-width="1"
-            />
-            <line
-              x1="2"
-              y1="12"
-              x2="22"
-              y2="12"
-              stroke="black"
-              stroke-width="1"
-            />
-          </svg>
-        </div>
+        (
+        {editMode && (
+          <div style={{ zIndex: "1", pointerEvents: "none" }}>
+            <svg viewBox="0 0 24 24" width="24" height="24">
+              <line
+                x1="12"
+                y1="2"
+                x2="12"
+                y2="22"
+                stroke="black"
+                stroke-width="1"
+              />
+              <line
+                x1="2"
+                y1="12"
+                x2="22"
+                y2="12"
+                stroke="black"
+                stroke-width="1"
+              />
+            </svg>
+          </div>
+        )}
+        )
       </div>
     </>
   );

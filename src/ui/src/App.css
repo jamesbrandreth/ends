@@ -13,25 +13,19 @@
     background-color: lightgrey;
 }
 
-.sidebar {
-    background-color: rgb(35 55 75 / 90%);
-    color: #fff;
-    padding: 6px 12px;
-    font-family: monospace;
+.topbar {
     z-index: 1;
     position: absolute;
     top: 0;
     left: 0;
-    margin: 12px;
-    border-radius: 4px;
+    display: flex;
 }
 
-.reset-button {
-    position: absolute;
-    top: 50px;
-    z-index: 1;
-    left: 12px;
-    padding: 4px 10px;
-    border-radius: 10px;
-    cursor: pointer;
+.topbar-item {
+    background-color: blue;
+    color: #fff;
+    margin: 12px;
+    margin-right: 0px;
+    border-radius: 4px;
+    padding: 6px 12px;
 }

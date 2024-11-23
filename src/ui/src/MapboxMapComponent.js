@@ -2,7 +2,6 @@ import { useRef, useEffect, useState } from "react";
 
 import mapboxgl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { Source } from "ol/source";
 
 const INITIAL_CENTRE = [-0.1257, 51.5082];
 const INITIAL_ZOOM = 9;
@@ -10,6 +9,8 @@ const INITIAL_ZOOM = 9;
 function MapComponent() {
   const mapRef = useRef();
   const mapContainerRef = useRef();
+
+  const [placeName, setPlaceName] = useState(null);
 
   const [centre, setCentre] = useState(INITIAL_CENTRE);
   const [zoom, setZoom] = useState(INITIAL_ZOOM);
@@ -27,7 +28,7 @@ function MapComponent() {
           },
           points: {
             type: "vector",
-            tiles: ["http://localhost:4000/tiles/{z}/{x}/{y}"],
+            tiles: [`${window.location.origin}/tiles/{z}/{x}/{y}`],
           },
         },
         layers: [
@@ -70,10 +71,41 @@ function MapComponent() {
     };
   }, []);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!placeName) return;
+    const [lon, lat] = [centre[0], centre[1]];
+
+    try {
+      const response = await fetch(`${window.location.origin}/add_point`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: placeName, lat, lon }),
+      });
+    } catch (error) {
+      console.error("Error submitting point:", error);
+    }
+  };
+
   return (
     <>
       <div className="sidebar">
-        Longitude: {centre[0].toFixed(4)} | Latitude: {centre[1].toFixed(4)}
+        <form onSubmit={handleSubmit}>
+          <input
+            Style={{ display: "inline-block" }}
+            id="placeName"
+            type="text"
+            value={placeName}
+            onChange={(e) => setPlaceName(e.target.value)}
+            placeholder="Enter place name"
+            required
+          />
+          <button Style={{ display: "inline-block" }} type="submit">
+            Save Name
+          </button>
+        </form>{" "}
       </div>
       <div
         id="map-container"

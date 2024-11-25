@@ -15,17 +15,16 @@ CREATE TABLE points (
 CREATE OR REPLACE VIEW grid
 AS
 SELECT
-   ST_AsText((ST_Dump(geom)).geom, 4326) AS os_geometry,
-   ST_AsText(ST_Transform((ST_Dump(geom)).geom, 4326)) AS wgs84_geometry
+   ST_Transform((ST_Dump(geom)).geom, 4326) AS wgs84_geometry
 FROM
    ST_SquareGrid(
-       100000,
-       ST_MakeEnvelope(0, 0, 700000, 1300000, 27700)
+       125,
+       ST_MakeEnvelope(503000, 155000, 560000, 200000, 27700)
    )
 ;
 
 
-CREATE OR REPLACE FUNCTION get_tile(z int, x int, y int)
+CREATE OR REPLACE FUNCTION get_tile_points(z int, x int, y int)
 RETURNS bytea
 LANGUAGE plpgsql
 AS $$
@@ -74,3 +73,20 @@ BEGIN ATOMIC
            placename
           );
 END;
+
+CREATE OR REPLACE FUNCTION get_squares_geojson()
+RETURNS jsonb
+LANGUAGE sql
+AS $$
+SELECT json_build_object(
+    'type', 'FeatureCollection',
+    'features', json_agg(ST_AsGeoJSON(squares.*)::json)
+)
+FROM (
+    SELECT DISTINCT points.name, to_hex(places.colour) as colour, grid.wgs84_geometry
+    FROM points LEFT JOIN grid
+    ON ST_Contains(grid.wgs84_geometry, points.location)
+    JOIN places ON points.name = places.name
+)
+AS squares
+$$;

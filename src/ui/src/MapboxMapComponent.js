@@ -1,5 +1,4 @@
 import { useRef, useEffect, useState } from "react";
-
 import mapboxgl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -7,18 +6,18 @@ const INITIAL_CENTRE = [-0.1257, 51.5082];
 const INITIAL_ZOOM = 9;
 
 function MapComponent() {
-  const mapRef = useRef();
-  const mapContainerRef = useRef();
-
+  const mapRef = useRef(null);
+  const mapContainerRef = useRef(null);
   const [placeName, setPlaceName] = useState(null);
-
   const [editMode, setEditMode] = useState(false);
-
   const [centre, setCentre] = useState(INITIAL_CENTRE);
   const [zoom, setZoom] = useState(INITIAL_ZOOM);
 
   useEffect(() => {
-    mapRef.current = new mapboxgl.Map({
+    if (!mapContainerRef.current) return;
+
+    // Initialize map
+    const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: {
         version: 8,
@@ -32,10 +31,6 @@ function MapComponent() {
             type: "vector",
             tiles: [`http://localhost:4000/tiles/points/{z}/{x}/{y}`],
           },
-          polygons: {
-            type: "vector",
-            tiles: [`http://localhost:4000/tiles/polygons/{z}/{x}/{y}`],
-          },
         },
         layers: [
           {
@@ -46,6 +41,9 @@ function MapComponent() {
           {
             id: "points",
             type: "circle",
+            layout: {
+              visibility: "none",
+            },
             source: "points",
             "source-layer": "points",
             paint: {
@@ -59,40 +57,68 @@ function MapComponent() {
               "circle-opacity": 1,
             },
           },
-          {
-            id: "polygons",
-            type: "line",
-            source: "polygons",
-            "source-layer": "polygon",
-            paint: {
-              "line-color": "#000",
-              "line-width": 1,
-            },
-            filter: ["==", "$type", "Polygon"],
-          },
         ],
       },
       center: centre,
       zoom: zoom,
     });
 
-    mapRef.current.on("move", () => {
-      const mapCentre = mapRef.current.getCenter();
-      const mapZoom = mapRef.current.getZoom();
+    // Store map instance
+    mapRef.current = map;
+
+    // Wait for map to load before adding sources and layers
+    map.on("load", async () => {
+      try {
+        const response = await fetch("http://localhost:4000/squares");
+        const geojsonData = await response.json();
+
+        // Add GeoJSON source
+        map.addSource("squares", {
+          type: "geojson",
+          data: geojsonData,
+        });
+
+        // Add squares layer
+        map.addLayer({
+          id: "squares",
+          type: "fill",
+          source: "squares",
+          paint: {
+            "fill-color": [
+              "case",
+              ["has", "colour"],
+              ["concat", "#", ["get", "colour"]],
+              "#FF0000",
+            ],
+            "fill-opacity": 0.5,
+          },
+        });
+      } catch (err) {
+        console.error("Error loading GeoJSON:", err);
+      }
+    });
+
+    // Add move handler
+    map.on("move", () => {
+      if (!map) return;
+      const mapCentre = map.getCenter();
+      const mapZoom = map.getZoom();
       setCentre([mapCentre.lng, mapCentre.lat]);
       setZoom(mapZoom);
     });
 
-    mapRef.current.addControl(
+    // Add attribution control
+    map.addControl(
       new mapboxgl.AttributionControl({
         customAttribution: "© OpenStreetMap contributors",
       }),
     );
 
+    // Cleanup
     return () => {
-      mapRef.current.remove();
+      if (map) map.remove();
     };
-  }, []);
+  }, []); // Only run on mount
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -115,7 +141,6 @@ function MapComponent() {
   return (
     <>
       <div className="topbar">
-        {/* EDIT MODE TOGGLE */}
         <button
           className="topbar-item"
           onClick={() => {
@@ -124,7 +149,6 @@ function MapComponent() {
         >
           {editMode ? "View" : "Edit"}
         </button>
-        {/* NAME ENTRY */}
         {editMode && (
           <div className="topbar-item">
             <form onSubmit={handleSubmit}>
@@ -162,7 +186,7 @@ function MapComponent() {
                 x2="24"
                 y2="44"
                 stroke="black"
-                stroke-width="2"
+                strokeWidth="2"
               />
               <line
                 x1="4"
@@ -170,7 +194,7 @@ function MapComponent() {
                 x2="44"
                 y2="24"
                 stroke="black"
-                stroke-width="2"
+                strokeWidth="2"
               />
             </svg>
           </div>

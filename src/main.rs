@@ -9,8 +9,8 @@ use axum::{
     Router,
 };
 use bytes::Bytes;
-use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
+use sqlx::{postgres::PgPoolOptions, types::JsonValue};
 
 use serde::{Deserialize, Serialize};
 
@@ -28,7 +28,9 @@ async fn main() {
 
     let app = Router::new()
         .nest_service("/", ui)
-        .route("/tiles/:z/:x/:y", get(tile))
+        .route("/tiles/points/:z/:x/:y", get(tile_points))
+        .with_state(pool.clone())
+        .route("/squares", get(squares))
         .with_state(pool.clone())
         .route("/add_point", post(add_point))
         .with_state(pool.clone())
@@ -42,17 +44,16 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
-async fn tile(
+async fn tile_points(
     Path((z, x, y)): Path<(i32, i32, i32)>,
     State(pool): State<PgPool>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    println!("z:{} x:{} y:{}", z, x, y);
-
-    let tile_data: Vec<u8> = sqlx::query_scalar!("SELECT get_tile($1, $2, $3) as tile", z, x, y)
-        .fetch_one(&pool)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .expect("DB PROBLEM");
+    let tile_data: Vec<u8> =
+        sqlx::query_scalar!("SELECT get_tile_points($1, $2, $3) as tile", z, x, y)
+            .fetch_one(&pool)
+            .await
+            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+            .expect("DB PROBLEM");
 
     Ok(TileResponse(tile_data))
 }
@@ -104,4 +105,21 @@ async fn get_placenames(State(pool): State<PgPool>) -> Result<Json<Vec<String>>,
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     Ok(Json(rows))
+}
+
+async fn squares(State(pool): State<PgPool>) -> Result<Json<JsonValue>, (StatusCode, String)> {
+    sqlx::query_scalar!("SELECT get_squares_geojson()")
+        .fetch_one(&pool)
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Database error: {}", e),
+            )
+        })?
+        .ok_or((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "No GeoJSON data returned".to_string(),
+        ))
+        .map(Json)
 }

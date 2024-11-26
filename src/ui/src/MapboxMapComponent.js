@@ -110,7 +110,7 @@ function MapComponent() {
     map.on("moveend", () => {
       const features = map.queryRenderedFeatures({ layers: ["squares"] });
       render_visible_places(
-        Array.from(new Set(features.map((x) => x.properties.name))),
+        new Map(features.map((x) => [x.properties.name, x.properties.colour])),
       );
     });
 
@@ -145,14 +145,15 @@ function MapComponent() {
     }
   };
 
-  const render_visible_places = (names) => {
+  const render_visible_places = (places) => {
     document.getElementById("placename_list").innerHTML = "";
-    for (const name of names) {
+    places.forEach((colour, name, map) => {
       const label = document.createElement("div");
       label.innerHTML = name;
       label.className = "topbar-item";
+      label.style = `background-color: #${colour}`;
       document.getElementById("placename_list").appendChild(label);
-    }
+    });
   };
 
   return (

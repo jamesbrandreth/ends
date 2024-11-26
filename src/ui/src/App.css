@@ -37,7 +37,7 @@
     display: flex;
     -webkit-overflow-scrolling: touch;
     overflow-x: auto;
-    max-width: 100%;
+    max-width: 80%;
     overflow-y: hidden;
     width: 100%;
 }

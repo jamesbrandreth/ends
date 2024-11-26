@@ -10,7 +10,6 @@
 #map-container {
     height: 100%;
     width: 100%;
-    /* temporarily set the background color so we can tell where the map container is positioned */
     background-color: lightgrey;
 }
 
@@ -23,10 +22,14 @@
 }
 
 .topbar-item {
-    background-color: blue;
+    background-color: #333333;
     color: #fff;
     margin: 12px;
     margin-right: 0px;
     border-radius: 4px;
     padding: 6px 12px;
+}
+
+.placename-list {
+    display: flex;
 }

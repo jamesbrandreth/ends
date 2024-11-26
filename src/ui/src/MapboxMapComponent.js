@@ -90,7 +90,7 @@ function MapComponent() {
               ["concat", "#", ["get", "colour"]],
               "#FF0000",
             ],
-            "fill-opacity": 0.5,
+            "fill-opacity": 0.9,
           },
         });
       } catch (err) {
@@ -105,6 +105,13 @@ function MapComponent() {
       const mapZoom = map.getZoom();
       setCentre([mapCentre.lng, mapCentre.lat]);
       setZoom(mapZoom);
+    });
+
+    map.on("moveend", () => {
+      const features = map.queryRenderedFeatures({ layers: ["squares"] });
+      render_visible_places(
+        Array.from(new Set(features.map((x) => x.properties.name))),
+      );
     });
 
     // Add attribution control
@@ -138,6 +145,16 @@ function MapComponent() {
     }
   };
 
+  const render_visible_places = (names) => {
+    document.getElementById("placename_list").innerHTML = "";
+    for (const name of names) {
+      const label = document.createElement("div");
+      label.innerHTML = name;
+      label.className = "topbar-item";
+      document.getElementById("placename_list").appendChild(label);
+    }
+  };
+
   return (
     <>
       <div className="topbar">
@@ -150,22 +167,30 @@ function MapComponent() {
           {editMode ? "View" : "Edit"}
         </button>
         {editMode && (
-          <div className="topbar-item">
-            <form onSubmit={handleSubmit}>
-              <input
-                Style={{ display: "inline-block" }}
-                id="placeName"
-                type="text"
-                value={placeName}
-                onChange={(e) => setPlaceName(e.target.value)}
-                placeholder="Enter place name"
-                required
-              />
-              <button Style={{ display: "inline-block" }} type="submit">
-                Save Name
-              </button>
-            </form>
-          </div>
+          <>
+            <div className="topbar-item">
+              <form onSubmit={handleSubmit}>
+                <input
+                  Style={{ display: "inline-block" }}
+                  id="placeName"
+                  type="text"
+                  value={placeName}
+                  onChange={(e) => setPlaceName(e.target.value)}
+                  placeholder="Enter place name"
+                  required
+                />
+                <button Style={{ display: "inline-block" }} type="submit">
+                  Save Name
+                </button>
+              </form>
+            </div>
+            <div className="topbar-item">
+              Pan the map to centre on your place, then name it.
+            </div>
+          </>
+        )}
+        {!editMode && (
+          <div id="placename_list" className="placename-list"></div>
         )}
       </div>
       <div

@@ -28,3 +28,5 @@ Requirements:
 - postgis
 
 Run `src/scripts/initialise-db.sh` then `src/scripts/create-db.sh` to make the postgres cluster and the ends database.
+
+The commands to run Ends are found in `mprocs.yaml` - see [mrpocs](https://github.com/pvolok/mprocs) to run these together automatically.

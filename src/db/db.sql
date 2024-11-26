@@ -64,13 +64,13 @@ CREATE PROCEDURE insert_point(lon float, lat float, placename text)
 LANGUAGE sql
 BEGIN ATOMIC
    INSERT INTO places (name, colour)
-   VALUES (placename, (floor(random() * 16777216)::int))
+   VALUES (LOWER(placename), (floor(random() * 16777216)::int))
    ON CONFLICT (name) DO NOTHING;
 
    INSERT INTO points
    VALUES (
            ST_SetSRID(ST_MakePoint(lon, lat), 4326),
-           placename
+           LOWER(placename)
           );
 END;
 

@@ -1,9 +1,9 @@
 # Ends
 Ends is a mapping project aimed at finding out what locals actually call places in London.
 
-The names on maps are often a bit prescriptive -- sometimes set by local government, property developers, or mapping organisations. But those names are often not the names used in real life. In London, places often move (take Holborn for eexample), and tube station names are often used as place names.
+The names on maps are often a bit prescriptive - sometimes set by local government, property developers, or mapping organisations. But those names are often not the names used in real life. In London, places often move (take Holborn for eexample), and tube station names are often used as place names.
 
-I was inspired by the [New York Time's map of New York Neighbourhoods](https://www.nytimes.com/interactive/2023/upshot/extremely-detailed-nyc-neighborhood-map.html) to try to collect the names as used by locals in real life.
+I was inspired by the [New York Times's map of New York Neighbourhoods](https://www.nytimes.com/interactive/2023/upshot/extremely-detailed-nyc-neighborhood-map.html) to try to collect the names as used by locals in real life.
 
 ## The Data
 Ends stores points, labelled with a place name. Although these points are stored, they are not made available on the map (displaying the points themselves seems a little too identifiable).

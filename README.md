@@ -11,7 +11,7 @@ Ends stores points, labelled with a place name. Although these points are stored
 The map displays a grid of regular 125m squares based on the OS nantional grid, where each square is coloured based on how many points within it have a given place name.
 
 ## The Code
-I've tried to keep this program as simple as possible. The frontend is react, and the backend is in Rust, using [axum](https://github.com/tokio-rs/axum). The `build` directory of the frontend app is included in the server binary, and the server serves the frontend as well as the API.
+I've tried to keep this program as simple as possible. The frontend is html+js, and the backend is in Rust, using [axum](https://github.com/tokio-rs/axum). The `build` directory of the frontend app is included in the server binary, and the server serves the frontend as well as the API.
 
 The database is a Postgres DB using PostGIS.
 

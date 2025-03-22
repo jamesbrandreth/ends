@@ -18,7 +18,7 @@ The database is a Postgres DB using PostGIS.
 ## Contributing
 I'm anything but an expert web developer - so contributions are very welcome! I'll try to look at any PRs. I'd especially like to make the database/api a bit more efficient.
 
-If you have an idea to expand the scope of the project - open an issue or tweet (bsky/𝕏) at me.
+If you have an idea to expand the scope of the project - open an issue or tweet at me.
 
 ## Running Ends
 Requirements:
